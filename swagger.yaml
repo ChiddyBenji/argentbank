@@ -33,6 +33,7 @@ paths:
           description: Invalid Fields
         '500':
           description: Internal Server Error
+
   /user/signup:
     post:
       tags:
@@ -57,6 +58,7 @@ paths:
           description: Invalid Fields
         '500':
           description: Internal Server Error
+
   /user/profile:
     post:
       security:
@@ -110,11 +112,93 @@ paths:
           description: Invalid Fields
         '500':
           description: Internal Server Error
+
+  /accounts/transactions:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Get accounts transactions
+      description: Retrieves transactions accounts (current month)
+      responses:
+        '200':
+          description: Accounts list
+          schema:
+            $ref: '#/definitions/AccountsList'
+
+  /transactions/{transactionId}:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Get transaction details
+      description: Retrieve specific transaction details
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Transaction details
+          schema:
+            $ref: '#/definitions/TransactionDetails'
+        '404':
+          description: Transaction not found
+
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Update transaction
+      description: Modify existing transaction
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTransaction'
+      responses:
+        '200':
+          description: Transaction updated
+        '403':
+          description: Not authorized to modify
+        '404':
+          description: Transaction not found
+
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions Module
+      summary: Delete transaction
+      description: Remove a transaction
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          type: string
+      responses:
+        '204':
+          description: Transaction deleted
+        '403':
+          description: Not authorized to delete
+        '404':
+          description: Transaction not found
+
 securityDefinitions:
   Bearer:
     type: apiKey
     name: Authorization
     in: header
+
 definitions:
   User:
     properties:
@@ -130,6 +214,7 @@ definitions:
       lastName:
         type: string
         description: user last name
+
   Login:
     properties:
       email:
@@ -138,6 +223,7 @@ definitions:
       password:
         type: string
         description: user password
+
   ApiResponse:
     type: object
     properties:
@@ -152,15 +238,110 @@ definitions:
             type: string
           email:
             type: string
+
   LoginResponse:
     type: object
     properties:
       token:
         type: string
+
   UserProfile:
     type: object
     properties:
       firstName:
         type: string
       lastName:
+        type: string
+
+  AccountsList:
+    type: object
+    properties:
+      accounts:
+        type: array
+        items:
+          $ref: '#/definitions/Account'
+
+  Account:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      balance:
+        type: number
+        format: double
+      accountType:
+        type: string
+        enum: [checking, savings, credit]
+      actualMonthTransactions:
+        type: array
+        items:
+          $ref: '#/definitions/Transaction'
+
+  TransactionsList:
+    type: object
+    properties:
+      accountId:
+        type: string
+      transactions:
+        type: array
+        items:
+          $ref: '#/definitions/Transaction'
+
+  Transaction:
+    type: object
+    properties:
+      id:
+        type: string
+      date:
+        type: string
+        format: date
+      amount:
+        type: number
+        format: double
+      description:
+        type: string
+      category:
+        type: string
+        enum: [food, shopping, transfer, salary, other]
+
+  TransactionDetails:
+    allOf:
+      - $ref: '#/definitions/Transaction'
+      - type: object
+        properties:
+          notes:
+            type: string
+          createdAt:
+            type: string
+            format: date-time
+            
+
+  NewTransaction:
+    type: object
+    required:
+      - amount
+      - description
+    properties:
+      amount:
+        type: number
+        format: double
+      description:
+        type: string
+      date:
+        type: string
+        format: date
+      category:
+        type: string
+        enum: [food, shopping, transfer, salary, other]
+      notes:
+        type: string
+
+  UpdateTransaction:
+    type: object
+    properties:
+      category:
+        type: string
+      notes:
         type: string
