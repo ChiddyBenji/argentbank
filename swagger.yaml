@@ -173,26 +173,6 @@ paths:
         '404':
           description: Transaction not found
 
-    delete:
-      security:
-        - Bearer: []
-      tags:
-        - Transactions Module
-      summary: Delete transaction
-      description: Remove a transaction
-      parameters:
-        - in: path
-          name: transactionId
-          required: true
-          type: string
-      responses:
-        '204':
-          description: Transaction deleted
-        '403':
-          description: Not authorized to delete
-        '404':
-          description: Transaction not found
-
 securityDefinitions:
   Bearer:
     type: apiKey
